@@ -1,0 +1,56 @@
+---
+title: "ETF Kostenbrechnung"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Anfallende Kosten
+
+Wertpapier-Bezeichnung:  ComStage-DAX TR UCITS ETF ETF001, Inhaber-Anteile I o.N.\
+WPKNR/ISIN:              LU0378438732\
+
+```{r}
+entgelte <- function(invest)
+{
+  # Die Provision für eine Inlandsorder setzt sich aus einem Grundentgelt von 4,90 Euro zzgl. 0,25 % 
+  # des Ordervolumens zusammen.
+  # Wir berechnen mindestens 9,90 Euro (bis 2.000 Euro Ordervolumen), maximal 59,90 Euro. 
+  # Zusätzlich fällt ein börsenplatzabhängiges Entgelt an. Dieses beträgt am Börsenplatz Xetra 0,0015 %, 
+  # mindestens 1,50 Euro, an den übrigen Börsen 0,0025 %, mindestens 2,50 Euro. 
+  # Neben den berechneten Entgelten und Provisionen weisen wir zusätzlich fremde Kosten (wie z. B. 
+  # Maklercourtage) in der Wertpapierabrechnung aus.
+  s <- 4.9       # fixer sockelbetrag
+  perc <- 0.0025 # prozentual
+  
+  res <- s + perc*invest
+  res <- max(9.9, res)
+  res <- min(59.9, res)
+  return(res)
+}
+
+Invest_orig <- 9920.90
+Wertentwicklung <- seq(from = 0.7, to = 1.3, by = 0.01)
+#Entgelte <- 29.70
+
+Invest_result <- Invest_orig*Wertentwicklung
+EntgelteInProzent <- (entgelte(Invest_result) + entgelte(Invest_orig))/Invest_orig * 100
+
+Gewinn <- Invest_result - entgelte(Invest_result) - entgelte(Invest_orig)
+```
+
+Entgelte summieren sich entsprechend auf: `r EntgelteInProzent` %
+
+
+## Gewinn bezogen auf Wertentwicklung
+
+```{r Gewinn, echo=FALSE}
+plot(x=(Wertentwicklung-1)*100, y = Gewinn)
+abline(h=Invest_orig)
+mtext("Entwicklung [%]", side=1)
+mtext("Gewinn nach Gebühren", side=1)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

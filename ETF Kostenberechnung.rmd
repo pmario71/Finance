@@ -66,6 +66,42 @@ Entgelte_proz <- entgelte(Invest_seq)/Invest_seq*100
 plot(x=Invest_seq, y=Entgelte_proz)
 ```
  
+## Verkauf und Wiedereinstieg
+
+Wie gross muss der Kursverlust einer Aktie sein, damit sich ihr Verkauf und Wiedereinstieg auf niedrigerem Niveau lohnt.
+D.h. billigere Wiedereinstieg muss die Gebühren mit finanzieren.
+(Steuerabgaben sind nicht berücksichtigt, da sie nur proportional zum Gewinn sind)
+
+```{r}
+Invest_abs <- seq(5000,15000,25000)
+Development <- seq(from=0.0, to = 0.02, by = 0.002)
+
+y <- function(x,i_abs)
+{
+  gew <- x*i_abs - entgelte(i_abs) - entgelte((1-x)*i_abs)
+  r <- gew/i_abs*100
+  return(r)
+}
+df <- data.frame(x=Development,I1=y(Development,5000), I2=y(Development,15000), I3=y(Development,25000))
+
+plot(x=df$x*100, y=df$I1, xlab = "Wertverlust in [%]", ylab="Gewinn/Verlust", type = "l", col="blue")
+grid()
+lines(x=df$x*100, y=df$I2, type = "l", col="red")
+lines(x=df$x*100, y=df$I3, type = "l", col="green")
+abline(h=0)
+
+
+root_5000 <- uniroot(y, c(0.0,0.7), i_abs=5000)
+root_5000 <- as.numeric(root_5000[1])*100
+abline(v=root_5000)
+```
+
+**Ergebnis:**\
+Wertverlust muss grösser als ~0.7 %\
+- 5000 EU Invest => `r root_5000` %
+
+Aber immer noch deutlich unter 1%!
+
 ## Gewinn bezogen auf Wertentwicklung
 
 Gebühren fallen bei An- und Verkauf an. 
